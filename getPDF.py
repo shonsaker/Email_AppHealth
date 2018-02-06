@@ -42,6 +42,7 @@ class getPdf():
 
                 # build the new options to get the correct page size
                 chrome_options.add_argument("--window-size=1200x" + str(height))
+                chrome_options.add_argument("--hide-scrollbars")
 
                 browser = webdriver.Chrome(r"C:\Users\shonsaker\Documents\shonsaker\chromedriver", options=chrome_options)
                 browser.get(url)
@@ -50,6 +51,8 @@ class getPdf():
                 sleep(45)
                 print("awake")
                 browser.save_screenshot(r"C:\Users\shonsaker\Documents\test.png")
+                browser.quit()
+                self.convertPdf()
 
         except Exception as e:
             print(e)
@@ -62,7 +65,3 @@ class getPdf():
 
         except Exception as e:
             print e
-
-# if __name__ == '__main__':
-#     get_apphealth()
-#     convertPdf()
