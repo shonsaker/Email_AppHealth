@@ -29,3 +29,14 @@ class ocelliDb():
         self.connection.close()
         return rows
 
+    def error_query(self, query, args):
+        self.connect()
+        try:
+            self.cursor.execute(query, args)
+            self.connection.commit()
+            self.connection.close()
+            return 0
+        except Exception:
+            return 1
+
+

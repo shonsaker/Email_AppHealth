@@ -1,5 +1,5 @@
 # Creates an email with the apphealth pdf
-# and sends it to the approiate people
+# and sends it to the users signed up for alerts
 # by Harry Wells, modified by Steven Honsaker
 
 from smtplib import SMTP
@@ -7,14 +7,13 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
 import traceback
 import datetime
-import os
-import sys
+import log_errors
 
 
 class SendMail:
 
     def __init__(self):
-
+        self.log = log_errors.error_handling()
         self.script_name = __file__.split('/')[-1].split('.')[0]
         self.now = datetime.datetime.now()
         self.subject = "Daily AppHealth Report By ErpSuites"
@@ -22,6 +21,7 @@ class SendMail:
         self.to_address = 'shonsaker@erpsuites.com'
         self.pdf_path = "C:\Users\shonsaker\Documents\out.pdf"
         self.module = 'send_apphealth_mail.py'
+        self.client_id = 0
 
     def create_email(self):
 
@@ -40,9 +40,9 @@ class SendMail:
 
             return email_structure
 
-        except Exception as e:
-            print(e)
-            self.log_error.log_error(self.module, sys._getframe().f_code.co_name, traceback.format_exc())
+        except Exception:
+            traceback_message = traceback.format_exc()
+            self.log.log_error(self.module, self.client_id, traceback_message)
 
     def run(self):
 
@@ -56,14 +56,8 @@ class SendMail:
             server_connect.sendmail(self.from_address, self.to_address, email.as_string())
 
         except Exception:
-            self.log_error.log_error(self.module, sys._getframe().f_code.co_name, traceback.format_exc())
+            traceback_message = traceback.format_exc()
+            self.log.log_error(self.module, self.client_id, traceback_message)
         finally:
             if server_connect is not None:
                 server_connect.quit()
-            if os.path.isfile(self.pdf_path):
-                # os.remove(self.pdf_path)
-                t = 0
-
-# if __name__ == "__main__":
-#     send_mail = SendMail()
-#     send_mail.run()
