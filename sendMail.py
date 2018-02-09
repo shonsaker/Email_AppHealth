@@ -7,19 +7,19 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
 import traceback
 import datetime
-import log_errors
+import ocelliDB
 
 
 class SendMail:
 
     def __init__(self):
-        self.log = log_errors.error_handling()
+        self.db = ocelliDB.ocelliDb()
         self.script_name = __file__.split('/')[-1].split('.')[0]
         self.now = datetime.datetime.now()
         self.subject = "Daily AppHealth Report By ErpSuites"
         self.from_address = 'shonsaker@erpsuites.com'
         self.to_address = 'shonsaker@erpsuites.com'
-        self.pdf_path = "C:\Users\shonsaker\Documents\out.pdf"
+        self.pdf_path = r"C:\Users\shonsaker\Documents\out.pdf"
         self.module = 'send_apphealth_mail.py'
         self.client_id = 0
 
@@ -42,7 +42,7 @@ class SendMail:
 
         except Exception:
             traceback_message = traceback.format_exc()
-            self.log.log_error(self.module, self.client_id, traceback_message)
+            self.db.log_error(self.module, self.client_id, traceback_message)
 
     def run(self):
 
@@ -57,7 +57,7 @@ class SendMail:
 
         except Exception:
             traceback_message = traceback.format_exc()
-            self.log.log_error(self.module, self.client_id, traceback_message)
+            self.db.log_error(self.module, self.client_id, traceback_message)
         finally:
             if server_connect is not None:
                 server_connect.quit()

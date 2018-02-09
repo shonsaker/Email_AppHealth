@@ -4,7 +4,6 @@ from selenium.webdriver.chrome.options import Options
 from time import sleep
 import traceback
 import os
-import log_errors
 import ocelliDB
 import sendMail
 
@@ -13,43 +12,42 @@ class getPdf():
 
     def __init__(self):
         self.send_mail = sendMail.SendMail()
-        self.log = log_errors.error_handling()
+        self.db = ocelliDB.ocelliDb()
         self.client_id = 24
+        self.db.client_id = self.client_id
         self.module = "SendPDF"
 
     def get_client_list(self):
         try:
             # Get a list of customers who have a user that has enabled the alert
             args = ""
-            query = "select DISTINCT client_id from e1n_client_users where client_user_summary_email='Y' and client_id = 24 order by client_id;"
-            db = ocelliDB.ocelliDb()
-            results = db.query(query, args)
+            query = f"select DISTINCT client_id from e1n_client_users where client_user_summary_email='Y' and client_id = {self.client_id} order by client_id;"
+            results = self.db.query(query, args)
             return results
         except Exception:
             traceback_message = traceback.format_exc()
-            self.log.log_error(self.module, self.client_id, traceback_message)
+            self.db.log_error(self.module, self.client_id, traceback_message)
 
     def get_user_list(self):
         try:
             # Get the list of users to send mail to
-            query = """select t1.user_key, t2.user_email_address
-                        from
-                          (select *
-                          from e1n_client_users
-                          where
-                          client_id = %s and client_user_summary_email = 'Y') as t1
-                        join
-                          (select user_email_address, user_key
-                            from e1n_users) as t2
-                          on t1.user_key = t2.user_key;"""
+            query = f"select t1.user_key, t2.user_email_address " \
+                     "   from " \
+                     "     (select * " \
+                     "     from e1n_client_users " \
+                     "     where " \
+                     "     client_id = {self.client_id} and client_user_summary_email = 'Y') as t1 " \
+                     "   join " \
+                     "     (select user_email_address, user_key " \
+                     "       from e1n_users) as t2 " \
+                     "     on t1.user_key = t2.user_key;"
 
-            db = ocelliDB.ocelliDb()
-            results = db.query(query, self.client_id)
+            results = self.db.query(query, self.client_id)
             return results
 
         except Exception:
             traceback_message = traceback.format_exc()
-            self.log.log_error(self.module, self.client_id, traceback_message)
+            self.db.log_error(self.module, self.client_id, traceback_message)
 
     def get_apphealth(self):
         try:
@@ -110,12 +108,12 @@ class getPdf():
 
         except Exception as e:
             traceback_message = traceback.format_exc()
-            self.log.log_error(self.module, self.client_id, traceback_message)
+            self.db.log_error(self.module, self.client_id, traceback_message)
 
     def convert_pdf(self):
         try:
             # convert the PNG to a PDF
-            self.pdf_path = "C:\Users\shonsaker\Documents\out.pdf"
+            self.pdf_path = r"C:\Users\shonsaker\Documents\out.pdf"
             with open(self.pdf_path, "wb") as f:
                 f.write(img2pdf.convert(self.png_path))
 
@@ -131,4 +129,4 @@ class getPdf():
             sleep(5)
         except Exception:
             traceback_message = traceback.format_exc()
-            self.log.log_error(self.module, self.client_id, traceback_message)
+            self.db.log_error(self.module, self.client_id, traceback_message)
